@@ -146,7 +146,7 @@ export default function Navbar() {
                   className="flex items-center gap-1.5 p-1.5 text-xs text-neutral-300 hover:text-white bg-neutral-900 border border-neutral-800 rounded-full pl-2 pr-3"
                 >
                   <User className="w-4 h-4 text-red-500" />
-                  <span>Account</span>
+                  <span className="hidden sm:inline">Account</span>
                 </Link>
               </div>
             ) : (

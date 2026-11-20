@@ -11,6 +11,7 @@ import {
   Banknote,
   ArrowRight,
   ShoppingBag,
+  Tag,
 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -18,7 +19,7 @@ import { formatEGP } from '@/lib/utils';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, subtotal, shippingFee, discountAmount, total, appliedCoupon, clearCart } = useCart();
+  const { cart, subtotal, shippingFee, discountAmount, total, appliedCoupon, applyCoupon, removeCoupon, clearCart } = useCart();
   const { user } = useAuth();
 
   // Egyptian Address Form Fields
@@ -34,6 +35,20 @@ export default function CheckoutPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponMessage, setCouponMessage] = useState<{ text: string; isError: boolean } | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
+  const handleApplyCoupon = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!couponCode.trim()) return;
+    setIsApplyingCoupon(true);
+    setCouponMessage(null);
+    const result = await applyCoupon(couponCode.trim());
+    setCouponMessage({ text: result.message, isError: !result.success });
+    if (result.success) setCouponCode('');
+    setIsApplyingCoupon(false);
+  };
 
   if (cart.length === 0) {
     return (
@@ -371,6 +386,44 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                 ))}
+              </div>
+
+              {/* Coupon code */}
+              <div className="pt-2 border-t border-neutral-800">
+                <label className="text-xs font-bold text-neutral-300 block mb-1.5">Discount Coupon Code</label>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs">
+                    <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                      <Tag className="w-3.5 h-3.5" />
+                      {appliedCoupon.code} applied
+                    </span>
+                    <button type="button" onClick={removeCoupon} className="text-neutral-400 hover:text-white underline text-[11px]">
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(event) => setCouponCode(event.target.value)}
+                      placeholder="e.g. JOMRAYZ10"
+                      className="flex-1 min-w-0 bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-xs text-white uppercase placeholder-neutral-600 focus:outline-none focus:border-red-500 font-mono"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isApplyingCoupon}
+                      className="shrink-0 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl"
+                    >
+                      Apply
+                    </button>
+                  </form>
+                )}
+                {couponMessage && (
+                  <p className={`text-[11px] mt-1.5 ${couponMessage.isError ? 'text-red-400' : 'text-emerald-400'}`}>
+                    {couponMessage.text}
+                  </p>
+                )}
               </div>
 
               {/* Pricing breakdown */}

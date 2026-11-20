@@ -13,7 +13,7 @@ import {
   Shirt,
   Sparkles,
 } from 'lucide-react';
-import { Product } from '@/lib/types';
+import { Category, Product } from '@/lib/types';
 import { formatEGP } from '@/lib/utils';
 
 export default function AdminProductsPage() {
@@ -21,6 +21,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   // Form states
   const [name, setName] = useState('');
@@ -34,6 +35,7 @@ export default function AdminProductsPage() {
   const [isBestSeller, setIsBestSeller] = useState(false);
   const [isPublished, setIsPublished] = useState(true);
   const [imageUrl, setImageUrl] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [variantsList, setVariantsList] = useState<Array<{ size: string; colorName: string; colorHex: string; stock: number }>>([
     { size: 'S', colorName: 'Onyx Black', colorHex: '#111111', stock: 10 },
     { size: 'M', colorName: 'Onyx Black', colorHex: '#111111', stock: 15 },
@@ -55,6 +57,10 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     fetchProducts();
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => setCategories(data.categories || []))
+      .catch((error) => console.error('Failed to load categories', error));
   }, []);
 
   const resetForm = () => {
@@ -70,6 +76,7 @@ export default function AdminProductsPage() {
     setIsBestSeller(false);
     setIsPublished(true);
     setImageUrl('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1000&q=80');
+    setCategoryId('');
     setVariantsList([
       { size: 'S', colorName: 'Onyx Black', colorHex: '#111111', stock: 10 },
       { size: 'M', colorName: 'Onyx Black', colorHex: '#111111', stock: 15 },
@@ -96,6 +103,7 @@ export default function AdminProductsPage() {
     setIsBestSeller(p.isBestSeller);
     setIsPublished(p.isPublished);
     setImageUrl(p.images?.[0]?.url || '');
+    setCategoryId(p.categoryId || p.category?.id || '');
     setVariantsList(
       p.variants.map((v) => ({
         size: v.size,
@@ -147,6 +155,7 @@ export default function AdminProductsPage() {
       isNewDrop,
       isBestSeller,
       isPublished,
+      categoryId: categoryId || null,
       images: imageUrl ? [imageUrl] : [],
       variants: variantsList,
     };
@@ -420,6 +429,24 @@ export default function AdminProductsPage() {
                     className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-red-500 font-mono"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-neutral-300 block mb-1">
+                  Catalog / Category
+                </label>
+                <select
+                  value={categoryId}
+                  onChange={(event) => setCategoryId(event.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-700 text-white rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-red-500"
+                >
+                  <option value="">No catalog / General Drop</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">

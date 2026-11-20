@@ -9,6 +9,7 @@ out/
 .env
 .env.local
 .env.*.local
+.vercel/
 
 # SQLite local databases
 *.db
@@ -31,3 +32,5 @@ Thumbs.db
 
 # Nested attachment repository
 /jomrayz/
+.vercel
+.env*

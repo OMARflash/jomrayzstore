@@ -39,8 +39,8 @@ export default function CheckoutPage() {
   const [couponMessage, setCouponMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
-  const handleApplyCoupon = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const handleApplyCoupon = async (event?: React.SyntheticEvent) => {
+    event?.preventDefault();
     if (!couponCode.trim()) return;
     setIsApplyingCoupon(true);
     setCouponMessage(null);
@@ -402,7 +402,7 @@ export default function CheckoutPage() {
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                  <div className="flex gap-2">
                     <input
                       type="text"
                       value={couponCode}
@@ -411,13 +411,14 @@ export default function CheckoutPage() {
                       className="flex-1 min-w-0 bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-xs text-white uppercase placeholder-neutral-600 focus:outline-none focus:border-red-500 font-mono"
                     />
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleApplyCoupon}
                       disabled={isApplyingCoupon}
                       className="shrink-0 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl"
                     >
                       Apply
                     </button>
-                  </form>
+                  </div>
                 )}
                 {couponMessage && (
                   <p className={`text-[11px] mt-1.5 ${couponMessage.isError ? 'text-red-400' : 'text-emerald-400'}`}>
